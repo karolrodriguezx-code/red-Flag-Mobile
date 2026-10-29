@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f7eee8" />
+  <meta name="description" content="Amor Sólido — una experiencia interactiva para reflexionar sobre nuestros vínculos." />
+
+  <title>Amor Sólido</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: "#F8F2ED",
+            rose: "#D88C8C",
+            roseDark: "#B96F72",
+            sage: "#9EAF9A",
+            ink: "#332E2B",
+            muted: "#786F6A",
+            sand: "#E8D8CB",
+            lavender: "#B9B0C9"
+          },
+          fontFamily: {
+            display: ["Georgia", "serif"],
+            sans: ["Inter", "system-ui", "sans-serif"]
+          },
+          boxShadow: {
+            soft: "0 12px 40px rgba(83, 63, 53, .10)",
+            card: "0 5px 24px rgba(83, 63, 53, .08)"
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(216,140,140,.16), transparent 28%),
+        radial-gradient(circle at 90% 20%, rgba(158,175,154,.14), transparent 28%),
+        #eee8e3;
+      color: #332E2B;
+      font-family: Inter, system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      max-width: 520px;
+      margin: auto;
+      background: #F8F2ED;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .app-shell {
+        margin: 24px auto;
+        min-height: calc(100vh - 48px);
+        border-radius: 34px;
+        box-shadow: 0 20px 70px rgba(48, 37, 30, .18);
+        overflow: hidden;
+      }
+    }
+
+    .view {
+      display: none;
+      min-height: 100vh;
+      padding-bottom: 100px;
+      animation: fadeUp .35s ease;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @media (min-width: 640px) {
+      .view {
+        min-height: calc(100vh - 48px);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    .heart-pulse {
+      animation: pulseSoft 2.4s infinite ease-in-out;
+    }
+
+    .glass {
+      background: rgba(255,255,255,.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.7);
+    }
+
+    .nav-bar {
+      position: fixed;
+      z-index: 50;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(520px, 100%);
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(248,242,237,.92);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(120,111,106,.10);
+    }
+
+    .nav-item {
+      transition: all .2s ease;
+    }
+
+    .nav-item.active {
+      color: #B96F72;
+      transform: translateY(-2px);
+    }
+
+    .nav-item.active .nav-icon {
+      background: rgba(216,140,140,.16);
+    }
+
+    .option {
+      transition: all .2s ease;
+      border: 1.5px solid rgba(120,111,106,.13);
+    }
+
+    .option:active {
+      transform: scale(.98);
+    }
+
+    .option.selected {
+      border-color: #D88C8C;
+      background: rgba(216,140,140,.12);
+      box-shadow: 0 5px 18px rgba(216,140,140,.12);
+    }
+
+    .progress-bar {
+      transition: width .35s ease;
+    }
+
+    .challenge-card {
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .challenge-card:active {
+      transform: scale(.985);
+    }
+
+    .modal {
+      animation: modalIn .25s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .tag {
+      font-size: .68rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      scrollbar-width: none;
+    }
+
+    .quote-mark {
+      font-family: Georgia, serif;
+      font-size: 5rem;
+      line-height: .6;
+      opacity: .15;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <!-- =========================
+       INICIO / MANIFIESTO
+  ========================== -->
+  <main id="home" class="view active">
+
+    <section class="relative px-6 pt-12 pb-8 overflow-hidden">
+      <div class="absolute -right-20 -top-16 w-56 h-56 rounded-full bg-rose/10"></div>
+      <div class="absolute -left-24 top-52 w-44 h-44 rounded-full bg-sage/10"></div>
+
+      <div class="relative">
+        <div class="flex items-center justify-between mb-12">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-2xl bg-white shadow-soft flex items-center justify-center text-xl heart-pulse">
+              ♡
+            </div>
+            <span class="font-semibold tracking-tight">Amor Sólido</span>
+          </div>
+
+          <button
+            onclick="toggleTheme()"
+            aria-label="Cambiar tema"
+            class="w-10 h-10 rounded-full bg-white/70 flex items-center justify-center shadow-card text-lg">
+            <span id="themeIcon">☼</span>
+          </button>
+        </div>
+
+        <div class="mb-5">
+          <span class="tag text-roseDark">Una pausa para conectar</span>
+        </div>
+
+        <h1 class="font-display text-5xl leading-[.98] mb-6">
+          Amar también es<br>
+          <span class="text-roseDark italic">permanecer.</span>
+        </h1>
+
+        <p class="text-muted leading-relaxed text-[15px] max-w-sm">
+          En un mundo diseñado para deslizar, comparar y reemplazar,
+          esta experiencia te invita a detenerte y mirar tus vínculos
+          con más presencia, libertad y responsabilidad.
+        </p>
+
+        <button
+          onclick="navigate('reflection')"
+          class="mt-8 w-full rounded-2xl bg-ink text-white py-4 font-semibold shadow-soft active:scale-[.98] transition">
+          Comenzar mi reflexión →
+        </button>
+      </div>
+    </section>
+
+    <section class="px-5 pb-8">
+      <div class="glass rounded-[28px] p-6 shadow-card">
+        <div class="quote-mark text-roseDark">“</div>
+
+        <p class="font-display text-[24px] leading-tight -mt-4">
+          Lo que importa no es tener más conexiones,
+          sino construir vínculos que puedan sostenerse.
+        </p>
+
+        <div class="mt-5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-sand flex items-center justify-center">
+            ◌
+          </div>
+          <div>
+            <p class="text-sm font-semibold">Una mirada desde Bauman</p>
+            <p class="text-xs text-muted">Amor líquido y vínculos contemporáneos</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-5 pb-8">
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="openConcept('liquido')" class="text-left bg-[#EEE2DC] rounded-3xl p-5 min-h-[180px]">
+          <span class="text-2xl">🌊</span>
+          <p class="tag mt-6 text-roseDark">Hoy</p>
+          <h3 class="font-display text-2xl mt-1">Amor líquido</h3>
+          <p class="text-xs text-muted mt-2 leading-relaxed">
+            Conexiones rápidas, frágiles y fáciles de abandonar.
+          </p>
+        </button>
+
+        <button onclick="openConcept('solido')" class="text-left bg-[#DFE8DE] rounded-3xl p-5 min-h-[180px]">
+          <span class="text-2xl">🌱</span>
+          <p class="tag mt-6 text-sage">Elegir</p>
+          <h3 class="font-display text-2xl mt-1">Amor sólido</h3>
+          <p class="text-xs text-muted mt-2 leading-relaxed">
+            Presencia, cuidado, verdad y responsabilidad compartida.
+          </p>
+        </button>
+      </div>
+    </section>
+
+    <section class="px-5 pb-8">
+      <div class="bg-ink text-white rounded-[28px] p-6">
+        <span class="tag text-sand">Manifiesto</span>
+
+        <h2 class="font-display text-3xl mt-3">
+          No se trata de amar perfecto.
+        </h2>
+
+        <p class="text-white/65 mt-3 leading-relaxed text-sm">
+          Se trata de aprender a estar. Escuchar antes de interpretar.
+          Elegir antes de consumir. Cuidar sin poseer. Ser libres sin
+          dejar de ser responsables del impacto que tenemos en otros.
+        </p>
+
+        <button
+          onclick="navigate('challenges')"
+          class="mt-6 px-5 py-3 rounded-xl bg-white text-ink text-sm font-semibold">
+          Ver desafíos de conexión
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       REFLEXIÓN
+  ========================== -->
+  <main id="reflection" class="view">
+
+    <header class="px-5 pt-10 pb-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="tag text-roseDark">Conócete</span>
+          <h1 class="font-display text-4xl mt-1">Tu mapa de conexión</h1>
+        </div>
+
+        <div class="w-12 h-12 rounded-2xl bg-white shadow-card flex items-center justify-center text-xl">
+          ✦
+        </div>
+      </div>
+
+      <p class="text-sm text-muted mt-4 leading-relaxed">
+        No es un diagnóstico clínico. Es una herramienta de reflexión
+        para observar cómo construyes y cuidas tus vínculos.
+      </p>
+    </header>
+
+    <section class="px-5">
+
+      <div class="flex justify-between items-center mb-3">
+        <span id="questionCounter" class="text-xs font-semibold text-muted">Pregunta 1 de 9</span>
+        <span id="questionCategory" class="tag text-roseDark">Apego</span>
+      </div>
+
+      <div class="h-1.5 rounded-full bg-sand overflow-hidden mb-6">
+        <div id="progress" class="progress-bar h-full bg-rose rounded-full" style="width:11.11%"></div>
+      </div>
+
+      <div class="bg-white rounded-[28px] p-6 shadow-card">
+        <h2 id="questionText" class="font-display text-2xl leading-tight">
+          Cuando una persona importante tarda en responderme...
+        </h2>
+
+        <div id="options" class="mt-6 space-y-3"></div>
+
+        <button
+          id="nextQuestion"
+          onclick="nextQuestion()"
+          disabled
+          class="mt-6 w-full py-4 rounded-2xl bg-ink text-white font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition">
+          Continuar
+        </button>
+      </div>
+
+      <div class="mt-5 bg-sage/10 rounded-2xl p-4 text-xs text-muted leading-relaxed">
+        💡 <strong class="text-ink">Recuerda:</strong>
+        una respuesta no define quién eres. La intención es abrir una conversación contigo mismo.
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       RESULTADO
+  ========================== -->
+  <main id="result" class="view">
+
+    <header class="px-5 pt-10 pb-6">
+      <span class="tag text-sage">Tu reflexión</span>
+      <h1 class="font-display text-4xl mt-2">Tu mapa de conexión</h1>
+      <p class="text-sm text-muted mt-3">
+        Una fotografía para pensar, no una etiqueta para encerrarte.
+      </p>
+    </header>
+
+    <section class="px-5 space-y-4">
+
+      <div class="bg-white rounded-[28px] p-6 shadow-card">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="tag text-roseDark">Tendencia de apego</span>
+            <h2 id="attachmentResult" class="font-display text-3xl mt-2">—</h2>
+          </div>
+          <div id="attachmentEmoji" class="text-4xl">♡</div>
+        </div>
+
+        <p id="attachmentDescription" class="text-sm text-muted mt-4 leading-relaxed"></p>
+      </div>
+
+      <div class="bg-white rounded-[28px] p-6 shadow-card">
+        <span class="tag text-sage">Lenguaje predominante</span>
+        <h2 id="loveResult" class="font-display text-3xl mt-2">—</h2>
+        <p id="loveDescription" class="text-sm text-muted mt-4 leading-relaxed"></p>
+      </div>
+
+      <div class="bg-white rounded-[28px] p-6 shadow-card">
+        <div class="flex justify-between items-end">
+          <div>
+            <span class="tag text-lavender">Impacto digital</span>
+            <h2 id="techResult" class="font-display text-3xl mt-2">—</h2>
+          </div>
+          <span id="techScore" class="font-semibold text-sm"></span>
+        </div>
+
+        <div class="h-2 rounded-full bg-sand mt-5 overflow-hidden">
+          <div id="techBar" class="h-full bg-lavender rounded-full transition-all duration-700"></div>
+        </div>
+
+        <p id="techDescription" class="text-sm text-muted mt-4 leading-relaxed"></p>
+      </div>
+
+      <div class="bg-[#EEE2DC] rounded-[28px] p-6">
+        <span class="tag text-roseDark">Una pregunta para llevar contigo</span>
+        <p id="reflectionPrompt" class="font-display text-2xl leading-tight mt-3"></p>
+      </div>
+
+      <button
+        onclick="navigate('challenges')"
+        class="w-full bg-ink text-white rounded-2xl py-4 font-semibold">
+        Elegir un desafío →
+      </button>
+
+      <button
+        onclick="restartQuiz()"
+        class="w-full py-3 text-sm text-muted">
+        Repetir reflexión
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       DESAFÍOS
+  ========================== -->
+  <main id="challenges" class="view">
+
+    <header class="px-5 pt-10 pb-5">
+      <span class="tag text-roseDark">Cofre de conexión</span>
+      <h1 class="font-display text-4xl mt-2">Desafíos para estar</h1>
+      <p class="text-sm text-muted mt-3 leading-relaxed">
+        Pequeños actos presenciales para recuperar lo que una pantalla
+        no puede reemplazar.
+      </p>
+    </header>
+
+    <section class="px-5">
+
+      <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-4">
+        <button onclick="filterChallenges('todos')" data-filter="todos"
+          class="filter-btn px-4 py-2 rounded-full bg-ink text-white text-xs font-semibold whitespace-nowrap">
+          Todos
+        </button>
+        <button onclick="filterChallenges('pareja')" data-filter="pareja"
+          class="filter-btn px-4 py-2 rounded-full bg-white text-muted text-xs font-semibold whitespace-nowrap">
+          Pareja
+        </button>
+        <button onclick="filterChallenges('familia')" data-filter="familia"
+          class="filter-btn px-4 py-2 rounded-full bg-white text-muted text-xs font-semibold whitespace-nowrap">
+          Familia
+        </button>
+        <button onclick="filterChallenges('amigos')" data-filter="amigos"
+          class="filter-btn px-4 py-2 rounded-full bg-white text-muted text-xs font-semibold whitespace-nowrap">
+          Amigos
+        </button>
+      </div>
+
+      <div id="challengeList" class="space-y-4"></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       SABIDURÍA / GLOSARIO
+  ========================== -->
+  <main id="wisdom" class="view">
+
+    <header class="px-5 pt-10 pb-6">
+      <span class="tag text-sage">Ideas para pensar</span>
+      <h1 class="font-display text-4xl mt-2">Pequeñas verdades</h1>
+      <p class="text-sm text-muted mt-3">
+        Conceptos que pueden cambiar la forma en que miramos nuestros vínculos.
+      </p>
+    </header>
+
+    <section class="px-5 space-y-3">
+
+      <button onclick="openConcept('bauman')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#E7DFEA] flex items-center justify-center text-xl">🌊</div>
+          <div class="flex-1">
+            <span class="tag text-lavender">Zygmunt Bauman</span>
+            <h2 class="font-display text-2xl">Amor líquido</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('dignidad')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#E9E2D8] flex items-center justify-center text-xl">◈</div>
+          <div class="flex-1">
+            <span class="tag text-roseDark">Ética</span>
+            <h2 class="font-display text-2xl">Dignidad</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('libertad')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#DFE8DE] flex items-center justify-center text-xl">🕊</div>
+          <div class="flex-1">
+            <span class="tag text-sage">Ética</span>
+            <h2 class="font-display text-2xl">Libertad</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('responsabilidad')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#EEE2DC] flex items-center justify-center text-xl">♡</div>
+          <div class="flex-1">
+            <span class="tag text-roseDark">Vínculos</span>
+            <h2 class="font-display text-2xl">Responsabilidad afectiva</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('apego')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#E1E7E1] flex items-center justify-center text-xl">🫶</div>
+          <div class="flex-1">
+            <span class="tag text-sage">Psicología</span>
+            <h2 class="font-display text-2xl">Estilos de apego</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('lenguajes')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#EEE2DC] flex items-center justify-center text-xl">💌</div>
+          <div class="flex-1">
+            <span class="tag text-roseDark">Gary Chapman</span>
+            <h2 class="font-display text-2xl">Lenguajes del amor</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+      <button onclick="openConcept('exclusividad')" class="w-full text-left bg-white rounded-[25px] p-5 shadow-card">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#E7DFEA] flex items-center justify-center text-xl">∞</div>
+          <div class="flex-1">
+            <span class="tag text-lavender">Reflexión</span>
+            <h2 class="font-display text-2xl">Exclusividad sana</h2>
+          </div>
+          <span>→</span>
+        </div>
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       MODAL DE CONCEPTO
+  ========================== -->
+  <div id="conceptModal"
+       class="hidden fixed inset-0 z-[100] bg-ink/50 backdrop-blur-sm p-5 flex items-end justify-center">
+
+    <div class="modal bg-cream rounded-[30px] w-full max-w-[500px] max-h-[85vh] overflow-y-auto p-6">
+
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span id="modalTag" class="tag text-roseDark">Concepto</span>
+          <h2 id="modalTitle" class="font-display text-4xl mt-1"></h2>
+        </div>
+
+        <button
+          onclick="closeConcept()"
+          class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-lg">
+          ×
+        </button>
+      </div>
+
+      <div id="modalContent" class="text-sm text-muted leading-relaxed space-y-4"></div>
+
+      <button
+        onclick="closeConcept()"
+        class="w-full mt-7 py-4 rounded-2xl bg-ink text-white font-semibold">
+        Entendido
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- =========================
+       MODAL DESAFÍO
+  ========================== -->
+  <div id="challengeModal"
+       class="hidden fixed inset-0 z-[100] bg-ink/50 backdrop-blur-sm p-5 flex items-end justify-center">
+
+    <div class="modal bg-cream rounded-[30px] w-full max-w-[500px] p-6">
+
+      <div class="flex justify-between">
+        <span id="challengeModalType" class="tag text-roseDark"></span>
+        <button
+          onclick="closeChallenge()"
+          class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+          ×
+        </button>
+      </div>
+
+      <div class="text-5xl mt-4" id="challengeModalIcon">♡</div>
+
+      <h2 id="challengeModalTitle" class="font-display text-4xl mt-3"></h2>
+
+      <p id="challengeModalDescription" class="text-muted text-sm leading-relaxed mt-4"></p>
+
+      <div class="mt-6 p-4 rounded-2xl bg-sage/10">
+        <p class="tag text-sage">Pregunta para conversar</p>
+        <p id="challengeModalQuestion" class="font-display text-xl mt-2"></p>
+      </div>
+
+      <button
+        onclick="completeChallenge()"
+        class="w-full mt-6 py-4 rounded-2xl bg-ink text-white font-semibold">
+        ✓ Marcar como realizado
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- =========================
+       NAVEGACIÓN
+  ========================== -->
+  <nav class="nav-bar">
+    <div class="flex justify-around items-center">
+
+      <button onclick="navigate('home')" data-nav="home" class="nav-item active flex flex-col items-center gap-1 text-muted">
+        <span class="nav-icon w-9 h-7 rounded-full flex items-center justify-center">⌂</span>
+        <span class="text-[10px] font-semibold">Inicio</span>
+      </button>
+
+      <button onclick="navigate('reflection')" data-nav="reflection" class="nav-item flex flex-col items-center gap-1 text-muted">
+        <span class="nav-icon w-9 h-7 rounded-full flex items-center justify-center">✦</span>
+        <span class="text-[10px] font-semibold">Reflexión</span>
+      </button>
+
+      <button onclick="navigate('challenges')" data-nav="challenges" class="nav-item flex flex-col items-center gap-1 text-muted">
+        <span class="nav-icon w-9 h-7 rounded-full flex items-center justify-center">♧</span>
+        <span class="text-[10px] font-semibold">Desafíos</span>
+      </button>
+
+      <button onclick="navigate('wisdom')" data-nav="wisdom" class="nav-item flex flex-col items-center gap-1 text-muted">
+        <span class="nav-icon w-9 h-7 rounded-full flex items-center justify-center">☷</span>
+        <span class="text-[10px] font-semibold">Sabiduría</span>
+      </button>
+
+    </div>
+  </nav>
+
+</div>
+
+
+<script>
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+
+const state = {
+  currentView: "home",
+  questionIndex: 0,
+  answers: [],
+  theme: "light",
+  completedChallenges: JSON.parse(localStorage.getItem("amorSolidoChallenges") || "[]")
+};
+
+
+/* ============================================================
+   NAVEGACIÓN
+============================================================ */
+
+function navigate(view) {
+  document.querySelectorAll(".view").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  const target = document.getElementById(view);
+
+  if (target) {
+    target.classList.add("active");
+    state.currentView = view;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.querySelectorAll(".nav-item").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  const nav = document.querySelector(`[data-nav="${view}"]`);
+
+  if (nav) {
+    nav.classList.add("active");
+  }
+}
+
+
+/* ============================================================
+   TEMA
+============================================================ */
+
+function toggleTheme() {
+  state.theme = state.theme === "light" ? "dark" : "light";
+
+  const shell = document.querySelector(".app-shell");
+  const icon = document.getElementById("themeIcon");
+
+  if (state.theme === "dark") {
+    shell.style.background = "#252321";
+    shell.style.color = "#F4ECE7";
+    icon.textContent = "☾";
+
+    document.querySelectorAll(".bg-white").forEach(el => {
+      el.dataset.originalBg = el.style.background;
+      el.style.background = "#302D2A";
+    });
+
+    document.querySelectorAll(".text-muted").forEach(el => {
+      el.dataset.originalColor = el.style.color;
+      el.style.color = "#B8ADA6";
+    });
+  } else {
+    shell.style.background = "#F8F2ED";
+    shell.style.color = "#332E2B";
+    icon.textContent = "☼";
+
+    document.querySelectorAll(".bg-white").forEach(el => {
+      el.style.background = "";
+    });
+
+    document.querySelectorAll(".text-muted").forEach(el => {
+      el.style.color = "";
+    });
+  }
+}
+
+
+/* ============================================================
+   CUESTIONARIO
+============================================================ */
+
+const questions = [
+  {
+    category: "Apego",
+    text: "Cuando una persona importante tarda en responderme...",
+    options: [
+      { text: "Me siento tranquilo/a; probablemente está ocupada.", type: "secure" },
+      { text: "Empiezo a pensar que algo está mal conmigo o con la relación.", type: "anxious" },
+      { text: "Prefiero no darle importancia y seguir con lo mío.", type: "avoidant" }
+    ]
+  },
+  {
+    category: "Apego",
+    text: "Cuando alguien quiere acercarse emocionalmente a mí...",
+    options: [
+      { text: "Puedo abrirme poco a poco y mantener mis límites.", type: "secure" },
+      { text: "Deseo mucha cercanía y temo perder a esa persona.", type: "anxious" },
+      { text: "A veces siento que demasiada cercanía me incomoda.", type: "avoidant" }
+    ]
+  },
+  {
+    category: "Apego",
+    text: "Durante un conflicto importante suelo...",
+    options: [
+      { text: "Intentar hablar cuando ambos estemos preparados.", type: "secure" },
+      { text: "Buscar rápidamente seguridad y respuestas.", type: "anxious" },
+      { text: "Tomar distancia y evitar hablar del tema.", type: "avoidant" }
+    ]
+  },
+  {
+    category: "Amor",
+    text: "Me siento especialmente querido/a cuando alguien...",
+    options: [
+      { text: "Me abraza, me toma de la mano o tiene contacto físico.", type: "touch" },
+      { text: "Me dice sinceramente lo que valora de mí.", type: "words" },
+      { text: "Aparta tiempo exclusivamente para estar conmigo.", type: "time" }
+    ]
+  },
+  {
+    category: "Amor",
+    text: "Para demostrar cariño, normalmente prefiero...",
+    options: [
+      { text: "Preparar o entregar un detalle significativo.", type: "gifts" },
+      { text: "Hacer algo concreto para ayudar a la otra persona.", type: "service" },
+      { text: "Decirle directamente cuánto significa para mí.", type: "words" }
+    ]
+  },
+  {
+    category: "Amor",
+    text: "Un momento que más fortalece un vínculo para mí es...",
+    options: [
+      { text: "Una conversación sin celulares ni interrupciones.", type: "time" },
+      { text: "Un abrazo largo o una muestra física de cariño.", type: "touch" },
+      { text: "Un pequeño detalle que demuestra que me conocen.", type: "gifts" }
+    ]
+  },
+  {
+    category: "Tecnología",
+    text: "Cuando estoy con alguien y llega una notificación...",
+    options: [
+      { text: "Normalmente puedo ignorarla y seguir presente.", type: "low" },
+      { text: "Suelo mirar rápidamente qué ocurrió.", type: "medium" },
+      { text: "Me cuesta mucho no revisar el teléfono.", type: "high" }
+    ]
+  },
+  {
+    category: "Tecnología",
+    text: "Las redes sociales influyen en mis expectativas sobre las relaciones...",
+    options: [
+      { text: "Poco; puedo diferenciar una publicación de la vida real.", type: "low" },
+      { text: "A veces me comparo con otras parejas o personas.", type: "medium" },
+      { text: "Frecuentemente siento que mi relación debería ser diferente.", type: "high" }
+    ]
+  },
+  {
+    category: "Tecnología",
+    text: "Si pudiera recuperar una hora al día sin pantallas...",
+    options: [
+      { text: "Probablemente la usaría para descansar o compartir con alguien.", type: "low" },
+      { text: "Me gustaría, pero no sé si podría mantenerlo.", type: "medium" },
+      { text: "Me costaría muchísimo dejar el teléfono.", type: "high" }
+    ]
+  }
+];
+
+function renderQuestion() {
+  const question = questions[state.questionIndex];
+
+  document.getElementById("questionCounter").textContent =
+    `Pregunta ${state.questionIndex + 1} de ${questions.length}`;
+
+  document.getElementById("questionCategory").textContent =
+    question.category;
+
+  document.getElementById("questionText").textContent =
+    question.text;
+
+  document.getElementById("progress").style.width =
+    `${((state.questionIndex + 1) / questions.length) * 100}%`;
+
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+
+  question.options.forEach((option, index) => {
+    const button = document.createElement("button");
+
+    button.className =
+      "option w-full text-left p-4 rounded-2xl bg-white flex items-start gap-3";
+
+    button.innerHTML = `
+      <span class="w-7 h-7 shrink-0 rounded-full bg-cream border border-sand flex items-center justify-center text-xs font-bold">
+        ${String.fromCharCode(65 + index)}
+      </span>
+      <span class="text-sm leading-relaxed">${option.text}</span>
+    `;
+
+    button.onclick = () => selectOption(index);
+
+    optionsContainer.appendChild(button);
+  });
+
+  document.getElementById("nextQuestion").disabled = true;
+}
+
+function selectOption(index) {
+  const buttons = document.querySelectorAll("#options .option");
+
+  buttons.forEach(btn => btn.classList.remove("selected"));
+
+  buttons[index].classList.add("selected");
+
+  state.answers[state.questionIndex] =
+    questions[state.questionIndex].options[index].type;
+
+  document.getElementById("nextQuestion").disabled = false;
+}
+
+function nextQuestion() {
+  if (state.answers[state.questionIndex] === undefined) return;
+
+  if (state.questionIndex < questions.length - 1) {
+    state.questionIndex++;
+    renderQuestion();
+  } else {
+    calculateResults();
+  }
+}
+
+function restartQuiz() {
+  state.questionIndex = 0;
+  state.answers = [];
+  renderQuestion();
+  navigate("reflection");
+}
+
+renderQuestion();
+
+
+/* ============================================================
+   RESULTADOS
+============================================================ */
+
+function calculateResults() {
+
+  const attachment = {
+    secure: 0,
+    anxious: 0,
+    avoidant: 0
+  };
+
+  const love = {
+    touch: 0,
+    words: 0,
+    time: 0,
+    gifts: 0,
+    service: 0
+  };
+
+  const tech = {
+    low: 0,
+    medium: 0,
+    high: 0
+  };
+
+  state.answers.forEach(answer => {
+    if (attachment[answer] !== undefined) attachment[answer]++;
+    if (love[answer] !== undefined) love[answer]++;
+    if (tech[answer] !== undefined) tech[answer]++;
+  });
+
+  const attachmentResult =
+    Object.keys(attachment).reduce((a, b) =>
+      attachment[a] >= attachment[b] ? a : b
+    );
+
+  const loveResult =
+    Object.keys(love).reduce((a, b) =>
+      love[a] >= love[b] ? a : b
+    );
+
+  const techResult =
+    Object.keys(tech).reduce((a, b) =>
+      tech[a] >= tech[b] ? a : b
+    );
+
+  const attachmentData = {
+    secure: {
+      title: "Seguro",
+      emoji: "🌿",
+      description:
+        "Tiendes a valorar la cercanía sin perder tu autonomía. Puedes expresar necesidades y tolerar cierta incertidumbre sin interpretar automáticamente la distancia como rechazo."
+    },
+    anxious: {
+      title: "Ansioso",
+      emoji: "🫶",
+      description:
+        "Podrías ser especialmente sensible a señales de distancia o rechazo. La reflexión puede ayudarte a diferenciar una necesidad legítima de conexión de una búsqueda constante de confirmación."
+    },
+    avoidant: {
+      title: "Evitativo",
+      emoji: "🕊",
+      description:
+        "Podrías valorar mucho tu independencia y sentir incomodidad ante una intimidad intensa. La autonomía puede coexistir con vínculos profundos cuando existe espacio para expresar necesidades."
+    }
+  };
+
+  const loveData = {
+    touch: {
+      title: "Contacto físico",
+      description:
+        "El afecto corporal, cuando existe consentimiento y comodidad, puede ser una forma importante de expresar cercanía."
+    },
+    words: {
+      title: "Palabras de afirmación",
+      description:
+        "Las palabras sinceras, el reconocimiento y expresar aquello que valoras pueden hacerte sentir especialmente conectado/a."
+    },
+    time: {
+      title: "Tiempo de calidad",
+      description:
+        "La presencia sin distracciones parece tener un peso especial. Para ti, compartir atención puede ser una forma profunda de decir: 'estoy aquí'."
+    },
+    gifts: {
+      title: "Regalos significativos",
+      description:
+        "Los detalles representan atención y memoria. No importa tanto el precio como la intención detrás de recordar aquello que hace especial a la otra persona."
+    },
+    service: {
+      title: "Actos de servicio",
+      description:
+        "Ayudar, facilitar algo o cuidar mediante acciones concretas puede ser tu forma preferida de expresar afecto."
+    }
+  };
+
+  const techData = {
+    low: {
+      title: "Bajo impacto",
+      description:
+        "Parece que puedes establecer una separación relativamente saludable entre tu vida digital y tus vínculos presenciales. Mantén esos espacios de presencia."
+    },
+    medium: {
+      title: "Impacto moderado",
+      description:
+        "La tecnología aparece como una presencia importante en tus vínculos. Podrías experimentar con momentos concretos sin notificaciones para recuperar atención compartida."
+    },
+    high: {
+      title: "Alto impacto",
+      description:
+        "Las pantallas parecen competir con frecuencia por tu atención. No significa que exista un problema clínico: puede ser una invitación a establecer límites conscientes."
+    }
+  };
+
+  document.getElementById("attachmentResult").textContent =
+    attachmentData[attachmentResult].title;
+
+  document.getElementById("attachmentEmoji").textContent =
+    attachmentData[attachmentResult].emoji;
+
+  document.getElementById("attachmentDescription").textContent =
+    attachmentData[attachmentResult].description;
+
+  document.getElementById("loveResult").textContent =
+    loveData[loveResult].title;
+
+  document.getElementById("loveDescription").textContent =
+    loveData[loveResult].description;
+
+  document.getElementById("techResult").textContent =
+    techData[techResult].title;
+
+  const techPercentage =
+    techResult === "low" ? 25 :
+    techResult === "medium" ? 60 : 90;
+
+  document.getElementById("techScore").textContent =
+    `${techPercentage}%`;
+
+  setTimeout(() => {
+    document.getElementById("techBar").style.width =
+      `${techPercentage}%`;
+  }, 100);
+
+  document.getElementById("techDescription").textContent =
+    techData[techResult].description;
+
+  const prompts = [
+    "¿Qué vínculo de tu vida necesita hoy menos pantalla y más presencia?",
+    "¿Qué haces cuando tienes miedo de perder a alguien: acercarte, huir o intentar controlar?",
+    "¿Qué significa para ti elegir a alguien libremente sin convertir esa elección en posesión?",
+    "¿Qué conversación estás posponiendo por miedo a lo que podría cambiar?",
+    "¿Qué pequeño acto podría demostrarle a alguien importante que realmente estás presente?"
+  ];
+
+  document.getElementById("reflectionPrompt").textContent =
+    prompts[Math.floor(Math.random() * prompts.length)];
+
+  navigate("result");
+}
+
+
+/* ============================================================
+   DESAFÍOS
+============================================================ */
+
+const challenges = [
+  {
+    id: "phone-free",
+    type: "pareja",
+    icon: "📵",
+    title: "Una hora sin pantalla",
+    description:
+      "Durante una hora, ambos dejan los celulares fuera de alcance. No tiene que ser una cita extraordinaria: cocinar, caminar, tomar café o simplemente conversar.",
+    question:
+      "¿Qué descubriste de la otra persona que normalmente no notas?"
+  },
+  {
+    id: "walk",
+    type: "pareja",
+    icon: "🌿",
+    title: "Caminar sin destino",
+    description:
+      "Salgan a caminar durante 30 minutos sin utilizar el teléfono para entretenerse. Dejen que la conversación aparezca naturalmente.",
+    question:
+      "¿Qué tema surgió cuando dejaron de intentar llenar los silencios?"
+  },
+  {
+    id: "gratitude",
+    type: "familia",
+    icon: "💌",
+    title: "Tres cosas que agradezco",
+    description:
+      "Cada persona debe decir en voz alta tres cosas concretas que agradece de otro miembro de la familia.",
+    question:
+      "¿Qué reconocimiento te sorprendió escuchar?"
+  },
+  {
+    id: "story",
+    type: "familia",
+    icon: "📖",
+    title: "Una historia que no conocías",
+    description:
+      "Pregunta a un familiar mayor por una experiencia de su juventud que nunca hayas escuchado completamente.",
+    question:
+      "¿Qué parte de esa historia cambia la manera en que ves a esa persona?"
+  },
+  {
+    id: "meal",
+    type: "familia",
+    icon: "🍲",
+    title: "Mesa presente",
+    description:
+      "Compartan una comida sin celulares. Cada persona debe contar algo bueno, algo difícil y algo que espera de la próxima semana.",
+    question:
+      "¿Qué aprendiste de alguien que creías conocer muy bien?"
+  },
+  {
+    id: "friend",
+    type: "amigos",
+    icon: "☕",
+    title: "Café sin scroll",
+    description:
+      "Reúnanse durante al menos 45 minutos. Los teléfonos permanecen guardados. La conversación es el único entretenimiento.",
+    question:
+      "¿Cuánto cambia una amistad cuando la atención deja de estar dividida?"
+  },
+  {
+    id: "old-memory",
+    type: "amigos",
+    icon: "📸",
+    title: "Recuerdo sin pantalla",
+    description:
+      "Cada amigo cuenta un recuerdo compartido que considera importante y explica por qué todavía significa algo.",
+    question:
+      "¿Qué hace que un recuerdo se convierta en parte de un vínculo?"
+  },
+  {
+    id: "truth",
+    type: "amigos",
+    icon: "🕯",
+    title: "Una conversación honesta",
+    description:
+      "Hablen de algo que normalmente evitan. No se trata de resolverlo todo, sino de escuchar sin interrumpir ni defenderse.",
+    question:
+      "¿Qué necesitas que tus amigos comprendan mejor de ti?"
+  }
+];
+
+let currentChallenge = null;
+
+function renderChallenges(filter = "todos") {
+
+  const list = document.getElementById("challengeList");
+
+  const filtered =
+    filter === "todos"
+      ? challenges
+      : challenges.filter(c => c.type === filter);
+
+  list.innerHTML = "";
+
+  filtered.forEach(challenge => {
+
+    const completed =
+      state.completedChallenges.includes(challenge.id);
+
+    const card = document.createElement("button");
+
+    card.className =
+      "challenge-card w-full text-left bg-white rounded-[26px] p-5 shadow-card";
+
+    card.onclick = () => openChallenge(challenge.id);
+
+    card.innerHTML = `
+      <div class="flex gap-4">
+        <div class="w-14 h-14 shrink-0 rounded-2xl bg-cream flex items-center justify-center text-2xl">
+          ${challenge.icon}
+        </div>
+
+        <div class="flex-1">
+          <div class="flex justify-between items-start gap-3">
+            <span class="tag text-roseDark">${challenge.type}</span>
+            ${completed ? `<span class="text-sage text-sm">✓</span>` : ""}
+          </div>
+
+          <h3 class="font-display text-2xl mt-1">${challenge.title}</h3>
+
+          <p class="text-xs text-muted leading-relaxed mt-2 line-clamp-2">
+            ${challenge.description}
+          </p>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+function filterChallenges(filter) {
+
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.classList.remove("bg-ink", "text-white");
+    btn.classList.add("bg-white", "text-muted");
+  });
+
+  const active = document.querySelector(`[data-filter="${filter}"]`);
+
+  if (active) {
+    active.classList.remove("bg-white", "text-muted");
+    active.classList.add("bg-ink", "text-white");
+  }
+
+  renderChallenges(filter);
+}
+
+function openChallenge(id) {
+
+  currentChallenge = challenges.find(c => c.id === id);
+
+  if (!currentChallenge) return;
+
+  document.getElementById("challengeModalType").textContent =
+    currentChallenge.type;
+
+  document.getElementById("challengeModalIcon").textContent =
+    currentChallenge.icon;
+
+  document.getElementById("challengeModalTitle").textContent =
+    currentChallenge.title;
+
+  document.getElementById("challengeModalDescription").textContent =
+    currentChallenge.description;
+
+  document.getElementById("challengeModalQuestion").textContent =
+    currentChallenge.question;
+
+  document.getElementById("challengeModal").classList.remove("hidden");
+}
+
+function closeChallenge() {
+  document.getElementById("challengeModal").classList.add("hidden");
+}
+
+function completeChallenge() {
+
+  if (!currentChallenge) return;
+
+  if (!state.completedChallenges.includes(currentChallenge.id)) {
+    state.completedChallenges.push(currentChallenge.id);
+
+    localStorage.setItem(
+      "amorSolidoChallenges",
+      JSON.stringify(state.completedChallenges)
+    );
+  }
+
+  closeChallenge();
+  renderChallenges();
+}
+
+
+/* ============================================================
+   CONCEPTOS
+============================================================ */
+
+const concepts = {
+
+  liquido: {
+    tag: "Zygmunt Bauman",
+    title: "Amor líquido",
+    content: [
+      "Bauman describe una modernidad caracterizada por vínculos más frágiles y por una tensión entre el deseo de cercanía y el miedo a quedar atrapados.",
+      "En este contexto, las relaciones pueden empezar a tratarse como bienes de consumo: buscamos satisfacción inmediata y, cuando aparecen dificultades, puede parecer más sencillo reemplazar que reparar.",
+      "La idea no significa que todas las relaciones contemporáneas sean superficiales. Es una invitación a preguntarnos cuánto de nuestra manera de vincularnos está influido por la lógica de la elección constante, la velocidad y la incertidumbre.",
+      "Una relación sólida no significa permanecer en cualquier circunstancia. Significa que el cuidado, la conversación y la responsabilidad tienen valor suficiente como para intentar construir antes de descartar."
+    ]
+  },
+
+  solido: {
+    tag: "Manifiesto",
+    title: "Amor sólido",
+    content: [
+      "El amor sólido no es una fórmula perfecta ni una relación sin conflictos.",
+      "Es una forma de entender el vínculo como una construcción que necesita presencia, honestidad, límites, cuidado y tiempo.",
+      "Implica aceptar que las personas cambian y que amar no consiste en controlar ese cambio.",
+      "También significa reconocer que la libertad y el compromiso pueden coexistir: puedo elegir permanecer sin convertir al otro en una propiedad."
+    ]
+  },
+
+  dignidad: {
+    tag: "Ética",
+    title: "Dignidad",
+    content: [
+      "La dignidad implica reconocer que una persona posee un valor que no depende de cuánto nos guste, cuánto nos necesite o cuánto pueda satisfacer nuestras expectativas.",
+      "En los vínculos, esto significa evitar manipular, humillar, instrumentalizar o reducir al otro a una función.",
+      "También implica respetar nuestra propia dignidad: cuidar una relación no exige aceptar cualquier comportamiento.",
+      "Una pregunta útil es: ¿estoy tratando a esta persona como alguien que tiene un valor propio o como alguien que debe cumplir mis expectativas?"
+    ]
+  },
+
+  libertad: {
+    tag: "Ética",
+    title: "Libertad",
+    content: [
+      "La libertad dentro de una relación no significa ausencia de compromisos.",
+      "Significa que las decisiones importantes deben poder surgir de una elección consciente y no exclusivamente del miedo, la presión o la dependencia.",
+      "Una relación sana permite decir 'sí', pero también permite decir 'no'.",
+      "La libertad afectiva necesita límites claros porque una elección libre también puede implicar responsabilidad por las consecuencias de nuestras acciones."
+    ]
+  },
+
+  responsabilidad: {
+    tag: "Vínculos",
+    title: "Responsabilidad afectiva",
+    content: [
+      "Ser responsable afectivamente no significa controlar las emociones de otras personas ni evitar cualquier posibilidad de dolor.",
+      "Significa intentar comunicar con honestidad, establecer límites, respetar acuerdos y reconocer el impacto que nuestras decisiones pueden tener.",
+      "También implica reparar cuando hemos causado daño y no utilizar el silencio, la ambigüedad o la manipulación como herramientas de control.",
+      "La responsabilidad empieza con una pregunta sencilla: ¿qué necesita saber la otra persona para poder tomar decisiones informadas sobre este vínculo?"
+    ]
+  },
+
+  apego: {
+    tag: "Psicología",
+    title: "Estilos de apego",
+    content: [
+      "La teoría del apego estudia cómo las experiencias de relación pueden influir en la manera en que buscamos seguridad y respondemos a la cercanía.",
+      "De manera simplificada, un patrón seguro suele asociarse con confianza y comodidad con la intimidad; un patrón ansioso puede involucrar mayor preocupación por el rechazo; y un patrón evitativo puede involucrar incomodidad con una cercanía intensa.",
+      "Estos patrones no son diagnósticos ni destinos permanentes. Las personas pueden mostrar comportamientos distintos dependiendo de la relación, el contexto y sus experiencias.",
+      "Conocerse no consiste en colocarse una etiqueta, sino en identificar patrones y preguntarse qué necesitamos aprender."
+    ]
+  },
+
+  lenguajes: {
+    tag: "Psicología popular",
+    title: "Lenguajes del amor",
+    content: [
+      "El modelo popularizado por Gary Chapman propone cinco formas frecuentes de expresar y percibir afecto: palabras de afirmación, tiempo de calidad, regalos, actos de servicio y contacto físico.",
+      "Puede servir como herramienta conversacional para descubrir cómo diferentes personas experimentan el cariño.",
+      "No debe utilizarse como una clasificación rígida ni como sustituto de una comunicación abierta.",
+      "La mejor pregunta no es únicamente '¿cuál es mi lenguaje?', sino '¿cómo puedo aprender a expresar cariño de una manera que la otra persona pueda recibir?'"
+    ]
+  },
+
+  exclusividad: {
+    tag: "Reflexión",
+    title: "Exclusividad sana",
+    content: [
+      "La exclusividad puede ser un acuerdo significativo cuando surge de una decisión libre y compartida.",
+      "No debería confundirse con posesión, vigilancia o aislamiento.",
+      "Una relación exclusiva saludable necesita conversaciones explícitas sobre límites, expectativas, privacidad, amistades y formas de interactuar con otras personas.",
+      "Elegir a alguien no significa eliminar su autonomía. Significa construir un acuerdo que ambas personas entienden, aceptan y pueden revisar con honestidad."
+    ]
+  },
+
+  bauman: {
+    tag: "Zygmunt Bauman",
+    title: "La fragilidad de los vínculos",
+    content: [
+      "En 'Amor líquido', Bauman analiza las relaciones en una sociedad marcada por la incertidumbre, la individualización y el consumo.",
+      "La paradoja central es que podemos desear una relación segura mientras tememos las obligaciones que esa seguridad puede exigir.",
+      "Las tecnologías amplifican esta tensión al multiplicar las posibilidades de conexión y comparación.",
+      "La pregunta que queda abierta es profunda: ¿queremos realmente construir vínculos o solamente queremos sentirnos conectados?"
+    ]
+  }
+};
+
+function openConcept(key) {
+
+  const concept = concepts[key];
+
+  if (!concept) return;
+
+  document.getElementById("modalTag").textContent = concept.tag;
+  document.getElementById("modalTitle").textContent = concept.title;
+
+  const content = document.getElementById("modalContent");
+
+  content.innerHTML = concept.content
+    .map(paragraph => `<p>${paragraph}</p>`)
+    .join("");
+
+  document.getElementById("conceptModal").classList.remove("hidden");
+}
+
+function closeConcept() {
+  document.getElementById("conceptModal").classList.add("hidden");
+}
+
+
+/* ============================================================
+   CIERRE DE MODALES AL HACER CLICK FUERA
+============================================================ */
+
+document.getElementById("conceptModal").addEventListener("click", function(e) {
+  if (e.target === this) closeConcept();
+});
+
+document.getElementById("challengeModal").addEventListener("click", function(e) {
+  if (e.target === this) closeChallenge();
+});
+
+
+/* ============================================================
+   INICIALIZACIÓN
+============================================================ */
+
+renderChallenges();
+
+</script>
+
+</body>
+</html>
